@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fun Math Game for Kids</title>
+    <style>
+        body {
+            background-color: #ffefd5; /* Peach Puff background */
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            text-align: center;
+            margin-top: 30px;
+        }
+        #game-container {
+            background-color: #fff8dc; /* Cornsilk background */
+            border: 5px solid #f4a460; /* Sandy Brown border */
+            border-radius: 15px;
+            display: inline-block;
+            padding: 20px;
+        }
+        #question {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #ff4500; /* Orange Red */
+        }
+        .choices {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .choice-button {
+            background-color: #f0e68c; /* Khaki */
+            border: 2px solid #ffd700; /* Gold */
+            border-radius: 15px;
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 28px;
+            cursor: pointer;
+            width: 150px;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .choice-button:hover {
+            background-color: #ffd700;
+        }
+        .icon {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+        #result {
+            font-size: 28px;
+            margin-top: 20px;
+            height: 40px;
+            color: #6a5acd; /* Slate Blue */
+        }
+        #score {
+            font-size: 24px;
+            margin-top: 10px;
+            color: #da70d6; /* Orchid */
+        }
+        .emoji {
+            font-size: 50px;
+        }
+        h1 {
+            color: #ff69b4; /* Hot Pink */
+        }
+    </style>
+</head>
+<body>
+    <h1>🎈 Fun Math Game for Kids 🎈</h1>
+    <div id="game-container">
+        <div id="question"></div>
+        <div class="choices">
+            <button class="choice-button" onclick="checkAnswer(0)">
+                <div class="icon" id="choice0-icon">🐶</div>
+                <span id="choice0-text"></span>
+            </button>
+            <button class="choice-button" onclick="checkAnswer(1)">
+                <div class="icon" id="choice1-icon">🐱</div>
+                <span id="choice1-text"></span>
+            </button>
+            <button class="choice-button" onclick="checkAnswer(2)">
+                <div class="icon" id="choice2-icon">🐰</div>
+                <span id="choice2-text"></span>
+            </button>
+            <button class="choice-button" onclick="checkAnswer(3)">
+                <div class="icon" id="choice3-icon">🦊</div>
+                <span id="choice3-text"></span>
+            </button>
+        </div>
+        <div id="result"></div>
+        <div id="score"></div>
+    </div>
+
+    <!-- Audio elements for sound effects and background music -->
+    <audio id="correct-sound" src="https://freesound.org/data/previews/341/341695_5260877-lq.mp3"></audio>
+    <audio id="incorrect-sound" src="https://freesound.org/data/previews/156/156439_2736617-lq.mp3"></audio>
+    <audio id="background-music" src="https://www.bensound.com/bensound-music/bensound-littleidea.mp3" autoplay loop></audio>
+
+    <script>
+        var num1, num2, operator, correctAnswer;
+        var score = 0;
+        var totalQuestions = 0;
+        var correctChoiceIndex;
+
+        // Array of cute icons (emojis)
+        var cuteIcons = ['🐶', '🐱', '🐰', '🦊', '🐼', '🐨', '🐯', '🐸', '🐵', '🐷'];
+
+        function generateQuestion() {
+            num1 = Math.floor(Math.random() * 20) + 1; // Numbers from 1 to 20
+            num2 = Math.floor(Math.random() * 20) + 1;
+            var operators = ['+', '-', '×'];
+            operator = operators[Math.floor(Math.random() * operators.length)];
+
+            if (operator === '+') {
+                correctAnswer = num1 + num2;
+            } else if (operator === '-') {
+                // Ensure no negative results
+                if (num1 < num2) [num1, num2] = [num2, num1];
+                correctAnswer = num1 - num2;
+            } else if (operator === '×') {
+                num1 = Math.floor(Math.random() * 10) + 1;
+                num2 = Math.floor(Math.random() * 10) + 1;
+                correctAnswer = num1 * num2;
+            }
+
+            document.getElementById('question').innerText = num1 + ' ' + operator + ' ' + num2 + ' = ?';
+            document.getElementById('result').innerText = '';
+
+            // Generate multiple choices
+            var choices = generateChoices(correctAnswer);
+            correctChoiceIndex = choices.indexOf(correctAnswer);
+
+            // Assign icons to choices
+            var icons = getRandomIcons(4);
+
+            // Update buttons with choices and icons
+            for (var i = 0; i < 4; i++) {
+                document.getElementById('choice' + i + '-text').innerText = choices[i];
+                document.getElementById('choice' + i + '-icon').innerText = icons[i];
+            }
+        }
+
+        function generateChoices(correctAnswer) {
+            var choices = [];
+            choices.push(correctAnswer);
+
+            while (choices.length < 4) {
+                var wrongAnswer = correctAnswer + Math.floor(Math.random() * 10) - 5;
+                if (wrongAnswer < 0) wrongAnswer = Math.abs(wrongAnswer);
+                if (!choices.includes(wrongAnswer)) {
+                    choices.push(wrongAnswer);
+                }
+            }
+
+            // Shuffle choices
+            choices.sort(() => Math.random() - 0.5);
+            return choices;
+        }
+
+        function getRandomIcons(count) {
+            var icons = [];
+            var availableIcons = cuteIcons.slice(); // Copy the array
+
+            for (var i = 0; i < count; i++) {
+                var randomIndex = Math.floor(Math.random() * availableIcons.length);
+                icons.push(availableIcons[randomIndex]);
+                availableIcons.splice(randomIndex, 1); // Remove used icon
+            }
+
+            return icons;
+        }
+
+        function checkAnswer(choiceIndex) {
+            if (choiceIndex === correctChoiceIndex) {
+                document.getElementById('result').innerHTML = '<span class="emoji">🎉</span> Correct!';
+                document.getElementById('correct-sound').play();
+                score++;
+            } else {
+                document.getElementById('result').innerHTML = '<span class="emoji">👍</span> Good try! The correct answer was ' + correctAnswer + '.';
+                document.getElementById('incorrect-sound').play();
+            }
+            totalQuestions++;
+            document.getElementById('score').innerText = 'Score: ' + score + '/' + totalQuestions;
+            setTimeout(generateQuestion, 2000);
+        }
+
+        // Adjust background music volume
+        document.getElementById('background-music').volume = 0.2;
+
+        // Start the game
+        generateQuestion();
+    </script>
+</body>
+</html>
